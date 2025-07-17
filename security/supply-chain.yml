@@ -1,0 +1,62 @@
+rules:
+  - id: supply-chain-unpinned-git-dependency
+    message: >-
+      A Git dependency is being used without being pinned to a specific commit hash or tag.
+      This is a security risk as the remote repository could be changed or compromised,
+      leading to an unexpected or malicious version of the dependency being used.
+      Pin the dependency to a specific `rev` or `tag`.
+    languages:
+      - generic
+    severity: WARNING
+    patterns:
+      - pattern: |
+          $DEP = { git = "$URL", ... }
+      - pattern-not: |
+          $DEP = { git = "$URL", rev = "$HASH", ... }
+      - pattern-not: |
+          $DEP = { git = "$URL", tag = "$TAG", ... }
+
+  - id: supply-chain-wildcard-dependency
+    message: >-
+      A dependency is using a wildcard (`*`) for its version. This can lead to unexpected
+      breaking changes or the introduction of vulnerabilities if a new version is published.
+      Specify a semantic version range instead.
+    languages:
+      - generic
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: $DEP = "*"
+          - pattern: $DEP = { version = "*", ... }
+
+  - id: supply-chain-path-dependency-in-release
+    message: >-
+      A path dependency is being used. Path dependencies are intended for local development
+      and should not be published to a registry. They can also cause issues with build
+      reproducibility.
+    languages:
+      - generic
+    severity: WARNING
+    patterns:
+      - pattern: $DEP = { path = "$PATH", ... }
+      - pattern-inside: |
+          [dependencies]
+          ...
+
+  - id: supply-chain-risky-build-script
+    message: >-
+      A `build.rs` script is using a potentially dangerous function like `Command::new`
+      or `fs::write`. Build scripts are executed with full permissions and can be a vector
+      for supply chain attacks. Carefully review the script to ensure it is not malicious.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: std::process::Command::new(...)
+          - pattern: std::fs::write(...)
+      - pattern-inside: |
+          fn main() {
+            ...
+          }
+    filename-regex: build\.rs$

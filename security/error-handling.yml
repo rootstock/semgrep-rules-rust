@@ -1,0 +1,79 @@
+rules:
+  - id: error-handling-explicit-panic
+    message: >-
+      An explicit panic was found. Macros like `panic!`, `unimplemented!`, `unreachable!`,
+      and `todo!` will terminate the thread and should not be used in production library
+      or application code. Handle the error gracefully instead.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: panic!(...)
+          - pattern: unimplemented!(...)
+          - pattern: unreachable!(...)
+          - pattern: todo!(...)
+
+  - id: error-handling-unwrap-used
+    message: >-
+      The use of `.unwrap()` can cause a panic and should be avoided in production code.
+      Prefer using `if let`, `match`, or `?` to handle `Option` and `Result` types gracefully.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern: $X.unwrap()
+
+  - id: error-handling-expect-used
+    message: >-
+      The use of `.expect()` can cause a panic and should be avoided in production code.
+      While it provides a message, it is still a panic. Prefer `Result` types for error handling.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern: $X.expect(...)
+      
+  - id: error-handling-ignored-critical-result
+    message: >-
+      The `Result` of a critical operation is being ignored. This can hide important
+      failures. The `Result` should be handled or propagated.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: let _ = $EXPR;
+          - pattern: $EXPR.ok();
+      - metavariable-regex:
+          metavariable: $EXPR
+          regex: (write|send|commit|save|persist|flush|sync|lock)
+
+  - id: error-handling-arithmetic-overflow
+    message: >-
+      A standard arithmetic operation is being used, which can panic on overflow in debug
+      builds. For operations that might overflow, use a `checked_*`, `saturating_*`,
+      or `wrapping_*` method to handle the overflow explicitly.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: $A + $B
+          - pattern: $A - $B
+          - pattern: $A * $B
+      - pattern-not-inside: $X.checked_add(...)
+      - pattern-not-inside: $X.saturating_add(...)
+      - pattern-not-inside: $X.wrapping_add(...)
+
+  - id: error-handling-indexing-can-panic
+    message: >-
+      Direct indexing into a slice or array can panic if the index is out of bounds.
+      This can lead to a denial of service. Use `.get()` or `.get_mut()` instead to handle
+      the out-of-bounds case gracefully.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: $X[$Y]
+      - pattern-not-inside: |
+          if $Y < $X.len() {
+            ...
+          }
+      - pattern-not-inside: |
+          assert!($Y < $X.len());

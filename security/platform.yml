@@ -1,0 +1,57 @@
+rules:
+  - id: platform-insecure-unix-permissions
+    message: >-
+      A file is being created with overly permissive, world-writable permissions (e.g., 0o777 or 0o666).
+      This can allow other users on the system to modify or delete the file, leading to
+      security vulnerabilities. Use the most restrictive permissions possible.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: std::fs::set_permissions($PATH, std::fs::Permissions::from_mode($MODE))
+          - pattern: std::os::unix::fs::OpenOptionsExt::mode(&mut $OPTS, $MODE)
+      - metavariable-regex:
+          metavariable: $MODE
+          regex: 0o[0-7][0-7][2367]
+
+  - id: platform-setuid-setgid-usage
+    message: >-
+      A call to `setuid`, `setgid`, or a related function was found. These functions are
+      extremely dangerous as they change the privilege level of the running process.
+      Any code running after these calls must be considered security-critical and should
+      be carefully audited.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: libc::setuid(...)
+          - pattern: libc::setgid(...)
+          - pattern: libc::seteuid(...)
+          - pattern: libc::setegid(...)
+
+  - id: platform-dynamic-environment-variable
+    message: >-
+      An environment variable is being set with a dynamic value. If this value is controlled
+      by a user, it could be used to inject malicious commands or configurations into
+      the environment of child processes.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern: std::env::set_var($KEY, $VALUE)
+      - pattern-not: std::env::set_var($KEY, "...")
+
+  - id: platform-unsafe-signal-handler-call
+    message: >-
+      A function that is not async-signal-safe is being called inside a signal handler.
+      Functions like `println!` or mutex locks can deadlock or cause other undefined
+      behavior when called from a signal handler. Only call async-signal-safe functions.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-inside: |
+          extern "C" fn $HANDLER($SIG: libc::c_int) {
+            ...
+          }
+      - pattern-either:
+          - pattern: println!(...)
+          - pattern: $MUTEX.lock()

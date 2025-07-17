@@ -1,0 +1,76 @@
+rules:
+  - id: rust-security-static-mut
+    message: >-
+      Use of `static mut` is discouraged. It is inherently unsafe and a common source of
+      data races. Consider using a thread-safe alternative like `Mutex` or `RwLock`
+      from the standard library or a crate like `once_cell`.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern: "static mut $VAR: $TYPE = $VALUE;"
+
+  - id: rust-security-mutexguard-across-await
+    message: >-
+      A `MutexGuard` is being held across an `.await` point. This can lead to deadlocks,
+      especially in high-concurrency situations. The lock should be released before
+      the `.await` by introducing a new scope or dropping the guard explicitly.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-inside: |-
+          let $GUARD = $LOCK.lock()...;
+          ...
+          $F(...).await;
+          ...
+
+  - id: concurrency-toctou-file-access
+    message: >-
+      A file is checked for existence and then used in a separate operation. This creates
+      a Time-of-Check Time-of-Use (TOCTOU) race condition, where the file could be
+      deleted or replaced between the check and the use. Perform the operation and
+      then handle the `Result` instead.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern-inside: |-
+          if $PATH.exists() {
+            ...
+            $OP($PATH);
+            ...
+          }
+      - metavariable-regex:
+          metavariable: $OP
+          regex: (std::fs::File::open|std::fs::File::create|std::fs::remove_file|std::fs::read|std::fs::write)
+
+  - id: concurrency-unbounded-channel-dos
+    message: >-
+      An unbounded channel is being used. If the receiver cannot keep up with the sender,
+      this can lead to unbounded memory growth and a potential Denial of Service (DoS) attack.
+      Consider using a bounded channel with a sensible limit.
+    languages:
+      - rust
+    severity: WARNING
+    pattern-either:
+      - pattern: std::sync::mpsc::channel()
+      - pattern: crossbeam::channel::unbounded()
+      - pattern: tokio::sync::mpsc::unbounded_channel()
+      - pattern: async_channel::unbounded()
+
+  - id: concurrency-blocking-in-async
+    message: >-
+      A blocking operation is being used inside an async function. This can starve the
+      thread pool and prevent other tasks from running, leading to poor performance or
+      deadlocks. Use the async equivalent of the operation if available.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: std::thread::sleep(...)
+          - pattern: std::fs::read(...)
+          - pattern: std::fs::write(...)
+          - pattern: $X.lock()
+      - pattern-inside: async fn $FN(...) { ... }

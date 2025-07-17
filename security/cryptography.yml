@@ -1,0 +1,77 @@
+rules:
+  - id: rust-security-hardcoded-secret
+    message: >-
+      A hardcoded secret may have been found. Storing secrets in source code is a security
+      risk. Use a secrets management tool or environment variables instead.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          #- pattern-regex: (?i)(secret|password|key|token)\s*=\s*"[a-zA-Z0-9_\-]{16,}"
+          - pattern-regex: |-
+              (?i)(key|secret|password|token)\s*[:=]\s*["'][a-zA-Z0-9_\-]{16,}["']
+          - pattern: |
+              const $KEY: &[u8] = $VALUE;
+          - pattern: |
+              static $KEY: &[u8] = $VALUE;
+
+  - id: rust-security-weak-hashing-algorithm
+    message: >-
+      A weak hashing algorithm is being used. MD5 and SHA1 are known to be insecure and
+      should not be used for security-sensitive purposes like password hashing or digital
+      signatures. Consider using a modern, strong hashing algorithm like SHA-256 or Argon2.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: md5::Md5
+          - pattern: sha1::Sha1
+          - pattern: digest::SHA1
+          - pattern: Digest::md5
+          - pattern: Digest::sha1
+
+  - id: cryptography-timing-attack-vulnerability
+    message: >-
+      A non-constant-time comparison is being used on a variable that appears to be a
+      secret. This can create a timing attack vulnerability, where an attacker can
+      deduce the secret by measuring the time it takes for the comparison to complete.
+      Use a constant-time comparison function instead.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: $SECRET1 == $SECRET2
+      - metavariable-regex:
+          metavariable: $SECRET1
+          regex: '(?i).*(password|token|key|secret|hmac|signature).*'
+      - pattern-not-inside: constant_time_eq::constant_time_eq(..., ...)
+
+  - id: cryptography-reused-nonce-or-iv
+    message: >-
+      A nonce or Initialization Vector (IV) is being defined as a `const` or `static`,
+      which means it will be reused. Reusing a nonce or IV with the same key in most
+      encryption modes is a critical vulnerability that can compromise confidentiality.
+      A fresh, unpredictable nonce must be generated for every encryption.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern: |
+          const $IV: [u8; $SIZE] = [...];
+      - metavariable-regex:
+          metavariable: $IV
+          regex: '(?i).*(nonce|iv).*'
+
+  - id: cryptography-disabled-certificate-validation
+    message: >-
+      TLS certificate validation is being disabled. This is extremely dangerous as it
+      allows an attacker to perform a Man-in-the-Middle (MITM) attack by presenting a
+      fake certificate. Certificate validation should never be disabled in production.
+    languages:
+      - rust
+    severity: ERROR
+    pattern-either:
+      - pattern: $BUILDER.danger_accept_invalid_certs(true)
+      - pattern: $CONFIG.set_verify(openssl::ssl::SslVerifyMode::NONE)

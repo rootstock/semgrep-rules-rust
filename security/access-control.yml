@@ -1,0 +1,21 @@
+
+rules:
+  - id: rust-security-missing-auth-check
+    message: >-
+      A public route was found that may be missing an authorization check. Ensure that
+      all routes that handle sensitive data or operations have proper access control.
+      This is a placeholder rule; you will need to adapt it to your specific web
+      framework and authorization logic.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-inside: |-
+          #[public_route]
+          ...
+          fn $FN(...) { ... }
+      - pattern-not-inside: |-
+          #[public_route]
+          #[auth_required(...)]
+          ...
+          fn $FN(...) { ... }

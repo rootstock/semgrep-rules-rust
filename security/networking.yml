@@ -1,0 +1,43 @@
+rules:
+  - id: networking-unencrypted-http-connection
+    message: >-
+      An unencrypted HTTP connection is being made. Data sent over HTTP is in plaintext
+      and can be intercepted by an attacker. Use HTTPS instead.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: reqwest::get("http://...")
+          - pattern: reqwest::Client::new().get("http://...")
+          - pattern: hyper::Uri::from_static("http://...")
+      - pattern-not-regex: http://(localhost|127\.0\.0\.1)
+
+  - id: networking-missing-network-timeout
+    message: >-
+      A network request is being made without a timeout. This can cause the application
+      to hang indefinitely if the remote server is unresponsive. Always set a reasonable
+      timeout for network operations.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: reqwest::Client::new()
+      - pattern-not-inside: |
+          reqwest::Client::builder()
+            .timeout(...)
+            .build()
+
+  - id: networking-weak-tls-ciphers
+    message: >-
+      A weak TLS cipher suite is being used. These cipher suites are known to be vulnerable
+      to attack and should not be used. Rely on the defaults of a modern TLS library
+      unless you have a specific reason to configure custom ciphers.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern: $CONFIG.set_cipher_list($LIST)
+      - metavariable-regex:
+          metavariable: $LIST
+          regex: (?i)(des|rc4|md5|export|null|anon)

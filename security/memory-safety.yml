@@ -1,0 +1,37 @@
+rules:
+  - id: rust-security-unsafe-keyword
+    message: >-
+      The `unsafe` keyword is used here. `unsafe` blocks are a primary source of memory
+      safety vulnerabilities in Rust. Every use of `unsafe` should be carefully audited
+      to ensure it is correct and necessary.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: unsafe { ... }
+
+#  - id: rust-security-raw-pointer-dereference
+#    enabled: false
+#    message: >-
+#      A raw pointer is being dereferenced. This is a highly unsafe operation that can
+#      lead to use-after-free, null pointer dereference, or other memory corruption bugs.
+#      Ensure the pointer is valid and correctly aligned.
+#    languages:
+#      - rust
+#    severity: ERROR
+#    patterns:
+#      - pattern: "*($PTR)"
+
+  - id: rust-security-dangerous-ffi-call
+    message: >-
+      A call is being made to a known-dangerous C function via FFI. These functions
+      are common sources of security vulnerabilities. For example, `strcpy` can cause
+      buffer overflows. Consider using a safer alternative if available.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: libc::strcpy(...)
+          - pattern: libc::strcat(...)
+          - pattern: libc::system(...)

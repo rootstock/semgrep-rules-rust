@@ -1,0 +1,163 @@
+rules:
+  - id: input-validation-sql-injection
+    message: >-
+      A raw SQL query is being constructed using string formatting or concatenation.
+      If any of the formatted variables are user-controlled, this can allow an attacker
+      to execute arbitrary SQL queries. Use a parameterized query interface instead.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: $CONN.execute(&format!($FMT, ...), ...)
+          - pattern: $CONN.query(&format!($FMT, ...), ...)
+          - pattern: sqlx::query(&format!($FMT, ...))
+          - pattern: diesel::sql_query(format!($FMT, ...))
+          - pattern: format!("...SELECT...", ...)
+          - pattern: format!("...INSERT...", ...)
+          - pattern: format!("...UPDATE...", ...)
+          - pattern: format!("...DELETE...", ...)
+
+  - id: rust-security-command-injection-new
+    message: >-
+      Potential command injection. The program name for a command is derived from a variable.
+      If this variable is user-controlled, it can allow an attacker to execute arbitrary commands.
+      Avoid using variables for the command name and prefer static strings.
+    languages:
+      - rust
+    severity: ERROR
+    patterns:
+      - pattern: std::process::Command::new($VAR)
+      - pattern-not: std::process::Command::new("...")
+
+  - id: rust-security-command-injection-arg
+    message: >-
+      Potential command injection. A command argument is derived from a variable.
+      If this variable is user-controlled, it can allow an attacker to pass malicious
+      arguments to the command. Ensure the variable is sanitized before use.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: $CMD.arg($ARG)
+      - pattern-not: $CMD.arg("...")
+      - focus-metavariable: $ARG    
+
+  - id: rust-security-path-traversal-1
+    message: >-
+      Potential path traversal. A file path is being constructed using a variable that
+      may be user-controlled. This could allow an attacker to access or create arbitrary
+      files on the system. Ensure the input is sanitized before being used to construct a path.
+    languages:
+      - rust
+    severity: WARNING
+    patterns:
+      - pattern: std::path::Path::new($VAR)
+      - pattern-not: std::path::Path::new("...")
+
+  - id: input-validation-path-traversal-2
+    message: >-
+      A file path is being constructed from a variable that may be user-controlled.
+      This could allow an attacker to access or create arbitrary files on the system.
+      Ensure the input is sanitized and that the final path is canonicalized and checked
+      against a base directory.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: $BASE.join($USER_INPUT)
+      - pattern-not-inside: if $USER_INPUT.contains("..") { ... }
+
+  - id: input-validation-redos-vulnerability
+    message: >-
+      A regular expression is being created from a dynamic variable. If this variable
+      is user-controlled, it can lead to a Regular Expression Denial of Service (ReDoS)
+      attack. Use a pre-compiled, static regex or a library with timeout support.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern: regex::Regex::new($VAR)
+      - pattern-not: regex::Regex::new("...")
+
+  - id: input-validation-ldap-injection
+    message: >-
+      An LDAP filter is being constructed using string formatting. If the input is not
+      properly escaped, this can allow an attacker to bypass authentication or read
+      sensitive information. Use a library that provides safe LDAP filter construction.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: $LDAP.search(&format!($FMT, ...), ...)
+
+  - id: input-validation-xpath-injection
+    message: >-
+      An XPath query is being constructed using string formatting. This can allow an
+      attacker to read arbitrary parts of the XML document. Use a parameterized XPath
+      API if available.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: $DOC.evaluate(&format!($FMT, ...), ...)
+
+  - id: input-validation-template-injection
+    message: >-
+      A template is being rendered from a dynamic string. If this string is user-controlled,
+      it can lead to Server-Side Template Injection (SSTI), allowing an attacker to
+      execute arbitrary code. Always use pre-compiled templates loaded from a trusted source.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: $ENGINE.render_str($VAR, ...)
+      - pattern-not: $ENGINE.render_str("template_name", ...)
+
+  - id: input-validation-xxe-injection
+    message: >-
+      An XML document is being parsed without explicitly disabling DTD processing.
+      This can allow an attacker to perform an XML External Entity (XXE) attack to
+      read local files or cause a denial of service. Configure your XML parser to
+      disallow DTDs.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: quick_xml::Reader::from_str($XML)
+      - pattern-not-inside: |
+          let mut reader = quick_xml::Reader::from_str($XML);
+          reader.expand_empty_elements(false);
+          ...
+
+  - id: input-validation-nosql-injection
+    message: >-
+      A NoSQL query is being constructed with user input. This could allow an attacker
+      to bypass authentication or access unauthorized data. Ensure all input is strictly
+      validated and typed.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: "$COLL.find(doc! { $FIELD: $USER_INPUT })"
+      - pattern-not: '$COLL.find(doc! { $FIELD: "static_value" })'
+
+  - id: input-validation-code-injection
+    message: >-
+      A string is being passed to an "eval-like" function from a scripting engine.
+      If this string is user-controlled, it can lead to remote code execution.
+      Avoid evaluating dynamic code.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: rhai::Engine::new().eval($CODE)
+          - pattern: mlua::Lua::new().load($CODE).exec()
+          - pattern: pyo3::Python::with_gil(|py| py.run($CODE, ...))
+      - pattern-not: $ENGINE.eval("...")
+
+  - id: input-validation-ssrf-vulnerability
+    message: >-
+      A URL for an HTTP request is being constructed from a dynamic variable. If this
+      variable is user-controlled, it could allow an attacker to make requests to
+      arbitrary internal or external services (Server-Side Request Forgery - SSRF).
+      Validate the URL against an allow-list of trusted domains.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: reqwest::get($URL)
+      - metavariable-regex:
+          metavariable: $URL
+          regex: .*(format!|\+|req.param).*

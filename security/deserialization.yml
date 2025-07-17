@@ -1,0 +1,53 @@
+rules:
+  - id: deserialization-from-untrusted-source
+    message: >-
+      Data is being deserialized from a dynamic variable, which may be untrusted.
+      Deserializing untrusted data can lead to remote code execution, denial of service,
+      or other vulnerabilities. Ensure the input data is validated before parsing.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: serde_json::from_str($INPUT)
+          - pattern: serde_json::from_slice($INPUT)
+          - pattern: bincode::deserialize($INPUT)
+      - pattern-not: serde_json::from_str("...")
+
+  - id: deserialization-to-untyped-value
+    message: >-
+      Data is being deserialized into a generic, untyped value (e.g., `serde_json::Value`).
+      This can be a vector for "deserialization bomb" or "billion laughs" attacks, as it
+      bypasses the strict structure of a user-defined struct. Prefer deserializing into
+      a strongly-typed struct.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern-either:
+          - pattern: serde_json::from_str::<serde_json::Value>(...)
+          - pattern: serde_json::from_slice::<serde_json::Value>(...)
+          - pattern: toml::from_str::<toml::Value>(...)
+
+  - id: deserialization-missing-size-limit
+    message: >-
+      The `bincode` deserializer is being used without a size limit. This can allow an
+      attacker to craft a small message that allocates a huge amount of memory, leading
+      to a denial of service. Use `bincode::config().limit(...)` to set a reasonable size limit.
+    languages: [rust]
+    severity: WARNING
+    patterns:
+      - pattern: bincode::deserialize($DATA)
+      - pattern-not-inside: bincode::config().limit(...)
+
+  - id: deserialization-unsafe-in-custom-impl
+    message: >-
+      An `unsafe` block was found inside a custom `Deserialize` implementation. Custom
+      deserialization logic is security-sensitive, and the use of `unsafe` here is
+      extremely dangerous. This requires a thorough audit to ensure memory safety.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: unsafe { ... }
+      - pattern-inside: |
+          impl<'de> Deserialize<'de> for $TYPE {
+            ...
+          }

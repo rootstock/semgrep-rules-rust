@@ -1,0 +1,58 @@
+rules:
+  - id: dos-unbounded-memory-allocation
+    message: >-
+      A collection is being allocated with a potentially unbounded size from a dynamic
+      variable. This can allow an attacker to trigger a single, massive memory allocation,
+      leading to a denial of service. The size should be checked against a reasonable
+      limit before allocation.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: Vec::with_capacity($SIZE)
+          - pattern: String::with_capacity($SIZE)
+          - pattern: HashMap::with_capacity($SIZE)
+      - pattern-not: Vec::with_capacity(1024)
+      - pattern-not-inside: |
+          if $SIZE > $MAX_SIZE {
+            ...
+          }
+
+  - id: dos-unbounded-thread-spawning
+    message: >-
+      A new thread is being spawned inside a loop. This can lead to an unbounded number
+      of threads, quickly exhausting system resources and causing a denial of service.
+      Use a bounded thread pool to manage concurrency instead.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: std::thread::spawn(...)
+      - pattern-inside: loop { ... }
+
+  - id: dos-zip-bomb-vulnerability
+    message: >-
+      A file is being decompressed without checking its size first. This can lead to a
+      "zip bomb" attack, where a small compressed file expands to a huge size, exhausting
+      memory or disk space. Always check the size of untrusted input before decompressing.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern-either:
+          - pattern: flate2::read::GzDecoder::new($INPUT)
+          - pattern: zip::ZipArchive::new($INPUT)
+          - pattern: tar::Archive::new($INPUT)
+      - pattern-not-inside: |
+          if $INPUT.len() > $MAX_SIZE {
+            ...
+          }
+
+  - id: dos-fork-bomb
+    message: >-
+      A new process is being spawned inside a loop. This can create a "fork bomb",
+      a classic denial of service attack that exhausts system resources by creating
+      an exponential number of processes.
+    languages: [rust]
+    severity: ERROR
+    patterns:
+      - pattern: std::process::Command::new(...).spawn()
+      - pattern-inside: loop { ... }
