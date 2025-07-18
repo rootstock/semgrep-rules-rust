@@ -23,6 +23,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: platform-setuid-setgid-usage
     message: >-
@@ -48,6 +57,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: platform-dynamic-environment-variable
     message: >-
@@ -67,6 +85,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -93,5 +120,14 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }

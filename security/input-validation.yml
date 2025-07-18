@@ -26,6 +26,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: rust-security-command-injection-new
     message: >-
@@ -46,6 +55,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -71,6 +89,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: rust-security-path-traversal-1
     message: >-
@@ -91,6 +118,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -116,6 +152,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: input-validation-redos-vulnerability
     message: >-
@@ -135,6 +180,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -157,6 +211,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: input-validation-xpath-injection
     message: >-
@@ -175,6 +238,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -196,6 +268,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -223,6 +304,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: input-validation-nosql-injection
     message: >-
@@ -242,6 +332,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -268,6 +367,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: input-validation-ssrf-vulnerability
     message: >-
@@ -290,5 +398,14 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }

@@ -22,6 +22,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: error-handling-unwrap-used
     message: >-
@@ -41,6 +50,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: error-handling-expect-used
     message: >-
@@ -58,6 +76,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
       
@@ -82,6 +109,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -110,6 +146,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: error-handling-indexing-can-panic
     message: >-
@@ -135,5 +180,14 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }

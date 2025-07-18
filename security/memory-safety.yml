@@ -19,6 +19,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
 #  - id: rust-security-raw-pointer-dereference
 #    enabled: false
@@ -53,5 +62,14 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }

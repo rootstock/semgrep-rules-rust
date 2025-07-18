@@ -25,6 +25,15 @@ rules:
           fn $FN(...) {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
+            ...
+          }
 
   - id: supply-chain-wildcard-dependency
     message: >-
@@ -46,6 +55,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -70,6 +88,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
 
@@ -97,6 +124,15 @@ rules:
       - pattern-not-inside: |
           #[test]
           fn $FN(...) {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod tests {
+            ...
+            fn $FN(...) {
+              ...
+            }
             ...
           }
     filename-regex: build\.rs$
