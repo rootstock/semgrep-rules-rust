@@ -8,9 +8,11 @@ rules:
     severity: ERROR
     patterns:
       - pattern-either:
-          #- pattern-regex: (?i)(secret|password|key|token)\s*=\s*"[a-zA-Z0-9_\-]{16,}"
-          - pattern-regex: |-
-              (?i)(key|secret|password|token)\s*[:=]\s*["'][a-zA-Z0-9_\-]{16,}["']
+          - patterns:
+              - pattern-regex: |-
+                  (?i)(key|secret|password|token)\s*[:=]\s*["'][a-zA-Z0-9_\-]{16,}["']
+              - pattern-not-regex: |-
+                  (?i)(pub|public)(_|)(key)\s*[:=]\s*["'][a-zA-Z0-9_\-]{16,}["']
           - pattern: |
               const $KEY: &[u8] = $VALUE;
           - pattern: |
