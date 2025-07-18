@@ -16,6 +16,16 @@ rules:
           - pattern: format!("...INSERT...", ...)
           - pattern: format!("...UPDATE...", ...)
           - pattern: format!("...DELETE...", ...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-security-command-injection-new
     message: >-
@@ -28,6 +38,16 @@ rules:
     patterns:
       - pattern: std::process::Command::new($VAR)
       - pattern-not: std::process::Command::new("...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-security-command-injection-arg
     message: >-
@@ -40,7 +60,17 @@ rules:
     patterns:
       - pattern: $CMD.arg($ARG)
       - pattern-not: $CMD.arg("...")
-      - focus-metavariable: $ARG    
+      - focus-metavariable: $ARG 
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-security-path-traversal-1
     message: >-
@@ -53,6 +83,16 @@ rules:
     patterns:
       - pattern: std::path::Path::new($VAR)
       - pattern-not: std::path::Path::new("...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-path-traversal-2
     message: >-
@@ -65,6 +105,16 @@ rules:
     patterns:
       - pattern: $BASE.join($USER_INPUT)
       - pattern-not-inside: if $USER_INPUT.contains("..") { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-redos-vulnerability
     message: >-
@@ -76,6 +126,16 @@ rules:
     patterns:
       - pattern: regex::Regex::new($VAR)
       - pattern-not: regex::Regex::new("...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-ldap-injection
     message: >-
@@ -86,6 +146,16 @@ rules:
     severity: ERROR
     patterns:
       - pattern: $LDAP.search(&format!($FMT, ...), ...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-xpath-injection
     message: >-
@@ -96,6 +166,16 @@ rules:
     severity: ERROR
     patterns:
       - pattern: $DOC.evaluate(&format!($FMT, ...), ...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-template-injection
     message: >-
@@ -107,6 +187,16 @@ rules:
     patterns:
       - pattern: $ENGINE.render_str($VAR, ...)
       - pattern-not: $ENGINE.render_str("template_name", ...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-xxe-injection
     message: >-
@@ -122,6 +212,16 @@ rules:
           let mut reader = quick_xml::Reader::from_str($XML);
           reader.expand_empty_elements(false);
           ...
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-nosql-injection
     message: >-
@@ -133,6 +233,16 @@ rules:
     patterns:
       - pattern: "$COLL.find(doc! { $FIELD: $USER_INPUT })"
       - pattern-not: '$COLL.find(doc! { $FIELD: "static_value" })'
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-code-injection
     message: >-
@@ -147,6 +257,16 @@ rules:
           - pattern: mlua::Lua::new().load($CODE).exec()
           - pattern: pyo3::Python::with_gil(|py| py.run($CODE, ...))
       - pattern-not: $ENGINE.eval("...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: input-validation-ssrf-vulnerability
     message: >-
@@ -161,3 +281,13 @@ rules:
       - metavariable-regex:
           metavariable: $URL
           regex: .*(format!|\+|req.param).*
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

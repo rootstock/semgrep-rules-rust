@@ -9,6 +9,16 @@ rules:
     severity: WARNING
     patterns:
       - pattern: "debug_mode = true"
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: insecure-configuration-overly-permissive-cors
     message: >-
@@ -23,6 +33,16 @@ rules:
           - pattern: $CORS.allow_origin(cors::Any)
           - pattern: $CORS.allow_any_origin()
           - pattern: $RESPONSE.header("Access-Control-Allow-Origin", "*")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-alloy-hardcoded-rpc-url
     message: >-
@@ -34,6 +54,16 @@ rules:
     severity: WARNING
     patterns:
       - pattern-regex: 'https://(mainnet|sepolia|goerli)\.infura\.io/v3/[a-zA-Z0-9]+'
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: insecure-configuration-insecure-cookie-flags
     message: >-
@@ -51,3 +81,13 @@ rules:
             .secure(true)
             .http_only(true)
             .same_site(SameSite::Strict)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

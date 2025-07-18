@@ -13,6 +13,16 @@ rules:
       - metavariable-regex:
           metavariable: $MODE
           regex: 0o[0-7][0-7][2367]
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: platform-setuid-setgid-usage
     message: >-
@@ -28,6 +38,16 @@ rules:
           - pattern: libc::setgid(...)
           - pattern: libc::seteuid(...)
           - pattern: libc::setegid(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: platform-dynamic-environment-variable
     message: >-
@@ -39,6 +59,16 @@ rules:
     patterns:
       - pattern: std::env::set_var($KEY, $VALUE)
       - pattern-not: std::env::set_var($KEY, "...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: platform-unsafe-signal-handler-call
     message: >-
@@ -55,3 +85,13 @@ rules:
       - pattern-either:
           - pattern: println!(...)
           - pattern: $MUTEX.lock()
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

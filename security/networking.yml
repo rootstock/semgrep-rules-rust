@@ -12,6 +12,16 @@ rules:
           - pattern: reqwest::Client::new().get("http://...")
           - pattern: hyper::Uri::from_static("http://...")
       - pattern-not-regex: http://(localhost|127\.0\.0\.1)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: networking-missing-network-timeout
     message: >-
@@ -27,6 +37,16 @@ rules:
           reqwest::Client::builder()
             .timeout(...)
             .build()
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: networking-weak-tls-ciphers
     message: >-
@@ -41,3 +61,13 @@ rules:
       - metavariable-regex:
           metavariable: $LIST
           regex: (?i)(des|rc4|md5|export|null|anon)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

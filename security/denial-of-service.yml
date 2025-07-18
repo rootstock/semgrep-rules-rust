@@ -17,6 +17,16 @@ rules:
           if $SIZE > $MAX_SIZE {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: dos-unbounded-thread-spawning
     message: >-
@@ -28,6 +38,16 @@ rules:
     patterns:
       - pattern: std::thread::spawn(...)
       - pattern-inside: loop { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: dos-zip-bomb-vulnerability
     message: >-
@@ -45,6 +65,16 @@ rules:
           if $INPUT.len() > $MAX_SIZE {
             ...
           }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: dos-fork-bomb
     message: >-
@@ -56,3 +86,13 @@ rules:
     patterns:
       - pattern: std::process::Command::new(...).spawn()
       - pattern-inside: loop { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

@@ -12,6 +12,16 @@ rules:
           - pattern: serde_json::from_slice($INPUT)
           - pattern: bincode::deserialize($INPUT)
       - pattern-not: serde_json::from_str("...")
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: deserialization-to-untyped-value
     message: >-
@@ -26,6 +36,16 @@ rules:
           - pattern: serde_json::from_str::<serde_json::Value>(...)
           - pattern: serde_json::from_slice::<serde_json::Value>(...)
           - pattern: toml::from_str::<toml::Value>(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: deserialization-missing-size-limit
     message: >-
@@ -37,6 +57,16 @@ rules:
     patterns:
       - pattern: bincode::deserialize($DATA)
       - pattern-not-inside: bincode::config().limit(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: deserialization-unsafe-in-custom-impl
     message: >-
@@ -49,5 +79,15 @@ rules:
       - pattern: unsafe { ... }
       - pattern-inside: |
           impl<'de> Deserialize<'de> for $TYPE {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
             ...
           }

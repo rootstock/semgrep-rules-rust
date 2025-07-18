@@ -19,3 +19,13 @@ rules:
           #[auth_required(...)]
           ...
           fn $FN(...) { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

@@ -9,6 +9,16 @@ rules:
     severity: ERROR
     patterns:
       - pattern: "static mut $VAR: $TYPE = $VALUE;"
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-security-mutexguard-across-await
     message: >-
@@ -24,6 +34,16 @@ rules:
           ...
           $F(...).await;
           ...
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: concurrency-toctou-file-access
     message: >-
@@ -44,6 +64,16 @@ rules:
       - metavariable-regex:
           metavariable: $OP
           regex: (std::fs::File::open|std::fs::File::create|std::fs::remove_file|std::fs::read|std::fs::write)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: concurrency-unbounded-channel-dos
     message: >-
@@ -53,11 +83,22 @@ rules:
     languages:
       - rust
     severity: WARNING
-    pattern-either:
-      - pattern: std::sync::mpsc::channel()
-      - pattern: crossbeam::channel::unbounded()
-      - pattern: tokio::sync::mpsc::unbounded_channel()
-      - pattern: async_channel::unbounded()
+    patterns:
+      - pattern-either:
+          - pattern: std::sync::mpsc::channel()
+          - pattern: crossbeam::channel::unbounded()
+          - pattern: tokio::sync::mpsc::unbounded_channel()
+          - pattern: async_channel::unbounded()
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: concurrency-blocking-in-async
     message: >-
@@ -74,3 +115,13 @@ rules:
           - pattern: std::fs::write(...)
           - pattern: $X.lock()
       - pattern-inside: async fn $FN(...) { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

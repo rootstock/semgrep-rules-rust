@@ -12,6 +12,16 @@ rules:
           - pattern: unimplemented!(...)
           - pattern: unreachable!(...)
           - pattern: todo!(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: error-handling-unwrap-used
     message: >-
@@ -21,6 +31,16 @@ rules:
     severity: WARNING
     patterns:
       - pattern: $X.unwrap()
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: error-handling-expect-used
     message: >-
@@ -30,6 +50,16 @@ rules:
     severity: WARNING
     patterns:
       - pattern: $X.expect(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
       
   - id: error-handling-ignored-critical-result
     message: >-
@@ -44,6 +74,16 @@ rules:
       - metavariable-regex:
           metavariable: $EXPR
           regex: (write|send|commit|save|persist|flush|sync|lock)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: error-handling-arithmetic-overflow
     message: >-
@@ -60,6 +100,16 @@ rules:
       - pattern-not-inside: $X.checked_add(...)
       - pattern-not-inside: $X.saturating_add(...)
       - pattern-not-inside: $X.wrapping_add(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: error-handling-indexing-can-panic
     message: >-
@@ -77,3 +127,13 @@ rules:
           }
       - pattern-not-inside: |
           assert!($Y < $X.len());
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

@@ -17,6 +17,16 @@ rules:
               const $KEY: &[u8] = $VALUE;
           - pattern: |
               static $KEY: &[u8] = $VALUE;
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: rust-security-weak-hashing-algorithm
     message: >-
@@ -33,6 +43,16 @@ rules:
           - pattern: digest::SHA1
           - pattern: Digest::md5
           - pattern: Digest::sha1
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: cryptography-timing-attack-vulnerability
     message: >-
@@ -49,6 +69,16 @@ rules:
           metavariable: $SECRET1
           regex: '(?i).*(password|token|key|secret|hmac|signature).*'
       - pattern-not-inside: constant_time_eq::constant_time_eq(..., ...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: cryptography-reused-nonce-or-iv
     message: >-
@@ -65,6 +95,16 @@ rules:
       - metavariable-regex:
           metavariable: $IV
           regex: '(?i).*(nonce|iv).*'
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: cryptography-disabled-certificate-validation
     message: >-
@@ -74,6 +114,17 @@ rules:
     languages:
       - rust
     severity: ERROR
-    pattern-either:
-      - pattern: $BUILDER.danger_accept_invalid_certs(true)
-      - pattern: $CONFIG.set_verify(openssl::ssl::SslVerifyMode::NONE)
+    patterns:
+      - pattern-either:
+          - pattern: $BUILDER.danger_accept_invalid_certs(true)
+          - pattern: $CONFIG.set_verify(openssl::ssl::SslVerifyMode::NONE)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

@@ -9,6 +9,16 @@ rules:
     severity: WARNING
     patterns:
       - pattern: unsafe { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
 #  - id: rust-security-raw-pointer-dereference
 #    enabled: false
@@ -35,3 +45,13 @@ rules:
           - pattern: libc::strcpy(...)
           - pattern: libc::strcat(...)
           - pattern: libc::system(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }

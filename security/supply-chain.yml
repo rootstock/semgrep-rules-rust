@@ -15,6 +15,16 @@ rules:
           $DEP = { git = "$URL", rev = "$HASH", ... }
       - pattern-not: |
           $DEP = { git = "$URL", tag = "$TAG", ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: supply-chain-wildcard-dependency
     message: >-
@@ -28,6 +38,16 @@ rules:
       - pattern-either:
           - pattern: $DEP = "*"
           - pattern: $DEP = { version = "*", ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: supply-chain-path-dependency-in-release
     message: >-
@@ -42,6 +62,16 @@ rules:
       - pattern-inside: |
           [dependencies]
           ...
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
 
   - id: supply-chain-risky-build-script
     message: >-
@@ -57,6 +87,16 @@ rules:
           - pattern: std::fs::write(...)
       - pattern-inside: |
           fn main() {
+            ...
+          }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
             ...
           }
     filename-regex: build\.rs$
