@@ -104,6 +104,7 @@ rules:
     severity: ERROR
     patterns:
       - pattern: $BASE.join($USER_INPUT)
+      - pattern-not: $BASE.join("...")
       - pattern-not-inside: if $USER_INPUT.contains("..") { ... }
       - pattern-not-inside: |
           #[cfg(test)]

@@ -1,0 +1,30 @@
+rules:
+  - id: rust-command-injection-prod
+    message: >-
+      Potential command injection. The application executes a command using a
+      variable rather than a hardcoded string. If the variable can be
+      controlled by an attacker, this could lead to arbitrary command
+      execution. This rule ignores findings in test code.
+    languages:
+      - rust
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory:
+        - injection
+      owasp:
+        - A03:2021 - Injection
+      cwe:
+        - "CWE-78: Improper Neutralization of Special Elements used in an OS
+          Command ('OS Command Injection')"
+    patterns:
+      - pattern-either:
+          - pattern: std::process::Command::new($CMD)
+          - pattern: std::process::Command::new(...).arg($ARG)
+      - pattern-not: std::process::Command::new("...")
+      - pattern-not-inside: |
+          #[test]
+          fn $NAME(...) { ... }
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $NAME { ... }
